@@ -45,7 +45,7 @@ void clearDisplayInputValues() {
 }
 
 void printInputValues(double delta, double theta, double alpha, double beta) {
-  clearDsiplayInputValues();
+  clearDisplayInputValues();
   display.setCursor(0, 0);
   
   display.print("Delta: ");
@@ -72,7 +72,7 @@ void setup() {
     Serial.println(F("SSD1306 allocation failed"));
     for (;;); // Don't proceed, loop forever
   }
-  display.clearDisplay()
+  display.clearDisplay();
   display.setTextColor(WHITE);
 
   // timer setup
