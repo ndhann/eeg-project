@@ -13,7 +13,7 @@ Adafruit_SSD1306 display(SCREEN_WIDTH, SCREEN_HEIGHT, &Wire, OLED_RESET);
 double currentTime;
 double sampleTime;
 
-double inputDelta = 0.0;
+double inputDelta = 0;
 const int pinDelta = A0;
 const int resistDelta = 1;
 
@@ -29,11 +29,11 @@ double inputBeta = 0.0;
 const int pinBeta = A3;
 const int resistBeta = 1;
 
-void readAllInputs(double delta, double theta, double alpha, double beta) {
-  delta = analogRead(pinDelta);
-  theta = analogRead(pinTheta);
-  alpha = analogRead(pinAlpha);
-  beta = analogRead(pinBeta);
+void readAllInputs(double *delta, double *theta, double *alpha, double *beta) {
+  *delta = analogRead(pinDelta);
+  *theta = analogRead(pinTheta);
+  *alpha = analogRead(pinAlpha);
+  *beta = analogRead(pinBeta);
 }
 
 void clearDisplayInputValues() {
@@ -47,7 +47,7 @@ void clearDisplayInputValues() {
 void printInputValues(double delta, double theta, double alpha, double beta) {
   clearDisplayInputValues();
   display.setCursor(0, 0);
-  
+
   display.print("Delta: ");
   display.println(delta);
 
@@ -73,7 +73,7 @@ void setup() {
     for (;;); // Don't proceed, loop forever
   }
   display.clearDisplay();
-  display.setTextColor(WHITE);
+  display.setTextColor(WHITE, BLACK);
 
   // timer setup
   currentTime = millis();
@@ -83,7 +83,7 @@ void setup() {
 void loop() {
   // put your main code here, to run repeatedly:
   if (currentTime >= sampleTime) {
-    readAllInputs(inputDelta, inputTheta, inputAlpha, inputBeta);
+    readAllInputs(&inputDelta, &inputTheta, &inputAlpha, &inputBeta);
     currentTime = millis();
     sampleTime = currentTime + SAMPLEINTERVAL;
   }
