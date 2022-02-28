@@ -9,6 +9,7 @@
 #define SCREEN_ADDRESS 0x3C
 Adafruit_SSD1306 display(SCREEN_WIDTH, SCREEN_HEIGHT, &Wire, OLED_RESET);
 
+#define VOLTSPERBIT 0.0049
 #define SAMPLEINTERVAL 7.8125 // for sample rate of 128Hz
 double currentTime;
 double sampleTime;
@@ -30,10 +31,10 @@ const int pinBeta = A3;
 const int resistBeta = 1;
 
 void readAllInputs(double *delta, double *theta, double *alpha, double *beta) {
-  *delta = analogRead(pinDelta);
-  *theta = analogRead(pinTheta);
-  *alpha = analogRead(pinAlpha);
-  *beta = analogRead(pinBeta);
+  *delta = analogRead(pinDelta) * VOLTSPERBIT;
+  *theta = analogRead(pinTheta) * VOLTSPERBIT;
+  *alpha = analogRead(pinAlpha) * VOLTSPERBIT;
+  *beta = analogRead(pinBeta) * VOLTSPERBIT;
 }
 
 void clearDisplayInputValues() {
@@ -48,17 +49,19 @@ void printInputValues(double delta, double theta, double alpha, double beta) {
   clearDisplayInputValues();
   display.setCursor(0, 0);
 
+  display.println("Power");
+
   display.print("Delta: ");
-  display.println(delta);
+  display.println(delta * delta);
 
   display.print("Theta: ");
-  display.println(theta);
+  display.println(theta * theta);
 
   display.print("Alpha: ");
-  display.println(alpha);
+  display.println(alpha * alpha);
 
   display.print("Beta: ");
-  display.println(beta);
+  display.println(beta * beta);
 
   display.display();
 }
