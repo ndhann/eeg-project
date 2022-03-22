@@ -25,10 +25,37 @@ const int inputPin = A1;
 
 void setup() {
   Serial.begin(115200);
-  Serial.println("hello?");
 
   // obtain the sampling period in microseconds
   sampling_period_micro = round(1000000 * (1.0 / SAMPLES));
+}
+
+void printPowers(double input[]) {
+  double deltapower = 0.0;
+  double thetapower = 0.0;
+  double alphapower = 0.0;
+  double betapower = 0.0;
+  for (int i = 0; i <= 3; i++) {
+    deltapower += input[i] * input[i];
+  }
+  for (int i = 4; i <= 8; i++) {
+    thetapower += input[i] * input[i];
+  }
+  for (int i = 9; i <= 12; i++) {
+    alphapower += input[i] * input[i];
+  }
+  for (int i = 13; i <= 30; i++) {
+    betapower += input[i] * input[i];
+  }
+
+  Serial.print("Delta wave power is: ");
+  Serial.println(deltapower);
+  Serial.print("Theta wave power is: ");
+  Serial.println(thetapower);
+  Serial.print("Alpha wave power is: ");
+  Serial.println(alphapower);
+  Serial.print("Beta wave power is: ");
+  Serial.println(betapower);
 }
 
 void loop() {
@@ -36,28 +63,16 @@ void loop() {
     curTime = micros();
     inputReal[i] = analogRead(inputPin);
     inputImag[i] = 0;
-    Serial.print("Inside the first for loop, ");
-    Serial.println(i);
     while (micros() < (curTime + sampling_period_micro)) {
       // do nothing until it's time to sample again
     }
   }
-
-  Serial.println("outside the loop");
+  
   // calculate the FFT
-  //FFT.Windowing(inputReal, SAMPLES, FFT_WIN_TYP_HAMMING, FFT_FORWARD);
-  Serial.println("FFT Windowing done");
   FFT.Compute(inputReal, inputImag, SAMPLES, FFT_FORWARD);
-  Serial.println("FFT Computations done");
   double peak = FFT.MajorPeak(inputReal, SAMPLES, SAMPLES);
   Serial.print("FFT peak is: ");
   Serial.println(peak);
 
-  for ( int i = 0; i < (SAMPLES/2); i++) {
-    Serial.print(i, 1);
-    Serial.print(" ");
-    Serial.println(inputReal[i], 1);
-  }
-
-  //delay(1000); // repeat every second
+  printPowers(inputReal);
 }
