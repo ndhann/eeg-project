@@ -40,34 +40,34 @@ void setup() {
   sampling_period_micro = round(1000000 * (1.0 / SAMPLES));
 }
 
-void calculatePowers(double input[]) {
+void calculatePowers() {
   deltapower = 0;
   thetapower = 0;
   alphapower = 0;
   betapower = 0;
 
   for (int i = 1; i <= 3; i++) {
-    deltapower += sq(input[i]) + sq(inputImag[i]);
+    deltapower += sq(inputReal[i]) + sq(inputImag[i]);
   }
   deltapower = sqrt(deltapower / 3.0);
 
   for (int i = 4; i <= 8; i++) {
-    thetapower += sq(input[i]) + sq(inputImag[i]);
+    thetapower += sq(inputReal[i]) + sq(inputImag[i]);
   }
   thetapower = sqrt(thetapower / 5.0);
 
   for (int i = 9; i <= 12; i++) {
-    alphapower += sq(input[i]) + sq(inputImag[i]);
+    alphapower += sq(inputReal[i]) + sq(inputImag[i]);
   }
   alphapower = sqrt(alphapower / 4.0);
 
   for (int i = 13; i <= 30; i++) {
-    betapower += sq(input[i]) + sq(inputImag[i]);
+    betapower += sq(inputReal[i]) + sq(inputImag[i]);
   }
   betapower = sqrt(betapower / 18.0);
 }
-void printPowers(double input[]) {
-  calculatePowers(input);
+void printPowers() {
+  calculatePowers();
 
   Serial.print("Delta wave power is: ");
   Serial.println(deltapower);
@@ -118,8 +118,8 @@ double findMaxPower(double deltapower, double thetapower, double alphapower, dou
   return maxpower;
 }
 
-void displayPowers(double input[]) {
-  calculatePowers(input);
+void displayPowers() {
+  calculatePowers();
   double maxpower = findMaxPower(deltapower, thetapower, alphapower, betapower);
   Serial.println(maxpower);
 
@@ -168,5 +168,5 @@ void loop() {
   //Serial.print("FFT peak is: ");
   //Serial.println(peak);
 
-  displayPowers(inputReal);
+  displayPowers();
 }
