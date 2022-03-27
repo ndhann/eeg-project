@@ -1,14 +1,13 @@
-#include <Adafruit_SSD1306.h>
-#include <Adafruit_GFX.h>
-#include <SPI.h>
 #include <Wire.h>
+#include <SSD1306Ascii.h>
+#include <SSD1306AsciiWire.h>
 #include <arduinoFFT.h>
 
 #define SCREEN_WIDTH 128
-#define SCREEN_HEIGHT 64
-#define OLED_RESET 4
-#define SCREEN_ADDRESS 0x3C
-Adafruit_SSD1306 display(SCREEN_WIDTH, SCREEN_HEIGHT, &Wire, OLED_RESET);
+#define SCREEN_HEIGHT 16
+#define RST_PIN 4
+#define I2C_ADDRESS 0x3C
+SSD1306AsciiWire oled;
 
 #define VOLTSPERBIT 0.0049
 #define SAMPLES 128
@@ -30,32 +29,42 @@ const int inputPin = A1;
 
 void setup() {
   Serial.begin(115200);
+  Wire.begin();
+  Wire.setClock(400000L);
 
-  if (!display.begin(SSD1306_SWITCHCAPVCC, SCREEN_ADDRESS)) {
-    Serial.println(F("SSD1306 allocation failed"));
-    for (;;); // Don't proceed, loop forever
-  }
-  display.clearDisplay();
-  display.setTextColor(WHITE, BLACK);
-
+  oled.begin(&Adafruit128x64, I2C_ADDRESS, RST_PIN);
+  oled.clear();
+  oled.setFont(System5x7);
 
   // obtain the sampling period in microseconds
   sampling_period_micro = round(1000000 * (1.0 / SAMPLES));
 }
 
 void calculatePowers(double input[]) {
-  for (int i = 0; i <= 3; i++) {
-    deltapower += input[i] * input[i];
+  deltapower = 0;
+  thetapower = 0;
+  alphapower = 0;
+  betapower = 0;
+
+  for (int i = 1; i <= 3; i++) {
+    deltapower += sq(input[i]) + sq(inputImag[i]);
   }
+  deltapower = sqrt(deltapower / 3.0);
+
   for (int i = 4; i <= 8; i++) {
-    thetapower += input[i] * input[i];
+    thetapower += sq(input[i]) + sq(inputImag[i]);
   }
+  thetapower = sqrt(thetapower / 5.0);
+
   for (int i = 9; i <= 12; i++) {
-    alphapower += input[i] * input[i];
+    alphapower += sq(input[i]) + sq(inputImag[i]);
   }
+  alphapower = sqrt(alphapower / 4.0);
+
   for (int i = 13; i <= 30; i++) {
-    betapower += input[i] * input[i];
+    betapower += sq(input[i]) + sq(inputImag[i]);
   }
+  betapower = sqrt(betapower / 18.0);
 }
 void printPowers(double input[]) {
   calculatePowers(input);
@@ -70,25 +79,25 @@ void printPowers(double input[]) {
   Serial.println(betapower);
 }
 
-void drawBar(int x, int y, double power, double maxpower) {
+void drawBar(double power, double maxpower) {
   if (((power / maxpower) > (0.8))) {
-    display.drawChar(x + (4 * 7), y, 0xDA, WHITE, BLACK, 1);
+    oled.print("|");
   }
 
   if (((power / maxpower) > (0.6))) {
-    display.drawChar(x + (3 * 7), y, 0xDA, WHITE, BLACK, 1);
+    oled.print("|");
   }
 
   if (((power / maxpower) > (0.4))) {
-    display.drawChar(x + (2 * 7), y, 0xDA, WHITE, BLACK, 1);
+    oled.print("|");
   }
 
   if (((power / maxpower) > (0.2))) {
-    display.drawChar(x + (1 * 7), y, 0xDA, WHITE, BLACK, 1);
+    oled.print("|");
   }
 
   if (((power / maxpower) > (0.1))) {
-    display.drawChar(x + (0 * 7), y, 0xDA, WHITE, BLACK, 1);
+    oled.print("|");
   }
 }
 
@@ -106,51 +115,41 @@ double findMaxPower(double deltapower, double thetapower, double alphapower, dou
   if (maxpower < betapower) {
     maxpower = betapower;
   }
-}
-
-void drawBarGraph(double deltapower, double thetapower, double alphapower, double betapower) {
-  double maxpower = findMaxPower(deltapower, thetapower, alphapower, betapower);
-  drawBar(80, 8, deltapower, maxpower);
-  drawBar(80, 16, thetapower, maxpower);
-  drawBar(80, 24, alphapower, maxpower);
-  drawBar(80, 32, betapower, maxpower);
-}
-
-void clearDisplayedPowers() {
-  display.setCursor(0, 0);
-  display.setTextWrap(false);
-  // clear the displayed values by simply overwriting them with blank text
-  display.println("                        ");
-  display.println("                        ");
-  display.println("                        ");
-  display.println("                        ");
-  display.println("                        ");
-  display.setTextWrap(true);
+  return maxpower;
 }
 
 void displayPowers(double input[]) {
   calculatePowers(input);
+  double maxpower = findMaxPower(deltapower, thetapower, alphapower, betapower);
+  Serial.println(maxpower);
 
-  clearDisplayedPowers();
-  display.setCursor(0, 0);
+  oled.clear();
 
-  display.println("Power");
+  oled.println("Power");
 
-  display.print("Delta : ");
-  display.println(deltapower);
+  oled.print("Delta: ");
+  oled.print(deltapower);
+  oled.print(" ");
+  drawBar(deltapower, maxpower);
+  oled.println();
 
-  display.print("Theta: ");
-  display.println(thetapower);
+  oled.print("Theta: ");
+  oled.print(thetapower);
+  oled.print(" ");
+  drawBar(thetapower, maxpower);
+  oled.println();
 
-  display.print("Alpha: ");
-  display.println(alphapower);
+  oled.print("Alpha: ");
+  oled.print(alphapower);
+  oled.print(" ");
+  drawBar(alphapower, maxpower);
+  oled.println();
 
-  display.print("Beta: ");
-  display.println(betapower);
-
-  drawBarGraph(deltapower, thetapower, alphapower, betapower);
-
-  display.display();
+  oled.print("Beta:  ");
+  oled.print(betapower);
+  oled.print(" ");
+  drawBar(betapower, maxpower);
+  oled.println();
 }
 
 void loop() {
