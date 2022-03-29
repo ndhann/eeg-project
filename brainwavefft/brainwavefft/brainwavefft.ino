@@ -41,10 +41,10 @@ void setup() {
 }
 
 void calculatePowers() {
-  deltapower = 0;
-  thetapower = 0;
-  alphapower = 0;
-  betapower = 0;
+  deltapower = 0.0;
+  thetapower = 0.0;
+  alphapower = 0.0;
+  betapower = 0.0;
 
   for (int i = 1; i <= 3; i++) {
     deltapower += sq(inputReal[i]) + sq(inputImag[i]);
@@ -155,7 +155,7 @@ void displayPowers() {
 void loop() {
   for (int i = 0; i < SAMPLES; i++) {
     curTime = micros();
-    inputReal[i] = analogRead(inputPin);
+    inputReal[i] = analogRead(inputPin) * VOLTSPERBIT;
     inputImag[i] = 0;
     while (micros() < (curTime + sampling_period_micro)) {
       // do nothing until it's time to sample again
