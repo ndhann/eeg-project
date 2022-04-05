@@ -1,12 +1,13 @@
+#include <Adafruit_SSD1306.h>
+#include <Adafruit_GFX.h>
+#include <SPI.h>
 #include <Wire.h>
-#include <SSD1306Ascii.h>
-#include <SSD1306AsciiWire.h>
 
 #define SCREEN_WIDTH 128
 #define SCREEN_HEIGHT 16
 #define RST_PIN 4
 #define I2C_ADDRESS 0x3C
-SSD1306AsciiWire oled;
+Adafruit_SSD1306 display(SCREEN_WIDTH, SCREEN_HEIGHT, &Wire, RST_PIN);
 
 // calculated from the ADC ranges (0-5V and 0-1023)
 #define VOLTSPERBIT 0.0049
@@ -29,13 +30,14 @@ const int inputPin = A1;
 
 void setup() {
   Serial.begin(115200);
-  Wire.begin();
-  Wire.setClock(400000L);
 
-  oled.begin(&Adafruit128x64, I2C_ADDRESS, RST_PIN);
-  oled.clear();
-  // Set font to something small so everything can be displayed on screen.
-  oled.setFont(System5x7);
+  // Set up display
+  if (!display.begin(SSD1306_SWITCHCAPVCC, I2C_ADDRESS)) {
+    Serial.println(F("SSD1306 allocation failed"));
+    for (;;); // Don't proceed, loop forever
+  }
+  display.clearDisplay();
+  display.setTextColor(WHITE, BLACK);
 
   // obtain the sampling period in microseconds
   sampling_period_micro = round(1000000 * (1.0 / SAMPLES));
@@ -90,23 +92,23 @@ void printPowers() {
 // Draws a bar using ASCII characters based on the two quantities given
 void drawBar(double power, double maxpower) {
   if (((power / maxpower) > (0.8))) {
-    oled.print("|");
+    display.print("|");
   }
 
   if (((power / maxpower) > (0.6))) {
-    oled.print("|");
+    display.print("|");
   }
 
   if (((power / maxpower) > (0.4))) {
-    oled.print("|");
+    display.print("|");
   }
 
   if (((power / maxpower) > (0.2))) {
-    oled.print("|");
+    display.print("|");
   }
 
   if (((power / maxpower) > (0.1))) {
-    oled.print("|");
+    display.print("|");
   }
 }
 
@@ -128,41 +130,41 @@ double findMaxPower(double deltapower, double thetapower, double alphapower, dou
   return maxpower;
 }
 
-// displays values and the bar graph on the oled display
+// displays values and the bar graph on the display display
 void displayPowers() {
   calculatePowers();
   double maxpower = findMaxPower(deltapower, thetapower, alphapower, betapower);
   Serial.println(maxpower);
 
   // clear the screen every time calculations are refreshed
-  oled.clear();
+  display.clearDisplay();
 
-  oled.println("Power");
+  display.println("Power");
 
   // write out values and draw bars for each of the frequency ranges
-  oled.print("Delta: ");
-  oled.print(deltapower);
-  oled.print(" ");
+  display.print("Delta: ");
+  display.print(deltapower);
+  display.print(" ");
   drawBar(deltapower, maxpower);
-  oled.println();
+  display.println();
 
-  oled.print("Theta: ");
-  oled.print(thetapower);
-  oled.print(" ");
+  display.print("Theta: ");
+  display.print(thetapower);
+  display.print(" ");
   drawBar(thetapower, maxpower);
-  oled.println();
+  display.println();
 
-  oled.print("Alpha: ");
-  oled.print(alphapower);
-  oled.print(" ");
+  display.print("Alpha: ");
+  display.print(alphapower);
+  display.print(" ");
   drawBar(alphapower, maxpower);
-  oled.println();
+  display.println();
 
-  oled.print("Beta:  ");
-  oled.print(betapower);
-  oled.print(" ");
+  display.print("Beta:  ");
+  display.print(betapower);
+  display.print(" ");
   drawBar(betapower, maxpower);
-  oled.println();
+  display.println();
 }
 
 void loop() {
