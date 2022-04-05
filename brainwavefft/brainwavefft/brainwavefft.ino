@@ -1,7 +1,6 @@
 #include <Wire.h>
 #include <SSD1306Ascii.h>
 #include <SSD1306AsciiWire.h>
-#include <arduinoFFT.h>
 
 #define SCREEN_WIDTH 128
 #define SCREEN_HEIGHT 16
@@ -12,8 +11,6 @@ SSD1306AsciiWire oled;
 // calculated from the ADC ranges (0-5V and 0-1023)
 #define VOLTSPERBIT 0.0049
 #define SAMPLES 128
-
-arduinoFFT FFT = arduinoFFT();
 
 unsigned int sampling_period_micro;
 unsigned long curTime;
