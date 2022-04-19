@@ -114,8 +114,17 @@ void drawBar(double power, double maxpower) {
 }
 
 void drawBarGraph() {
-  for (int i = 1; i <= 30; i++) {
-    display.drawLine(4 * i, 0, 4 * i, output[i]/5, WHITE);
+  double max = output[1];
+  for (int i = 2; i <= 30; i++) {
+    if (output[i] > max) {
+      max = output[i];
+    }
+  }
+
+  double scaling = max / 16;
+
+  for (int i = 2; i <= 30; i++) {
+    display.drawLine(4 * i, 31 - (output[i] / scaling), 4 * i, 31, WHITE);
   }
 }
 
@@ -147,27 +156,21 @@ void displayPowers() {
   display.clearDisplay();
 
   // write out values and draw bars for each of the frequency ranges
-  /*
-  display.print("Delta: ");
+  display.setCursor(0, 0);
+  display.print("D: ");
   display.print(deltapower);
-  display.print(" ");
-  display.println();
-
-  display.print("Theta: ");
+  display.print("  ");
+  display.print("T: ");
   display.print(thetapower);
-  display.print(" ");
   display.println();
 
-  display.print("Alpha: ");
+  display.print("A: ");
   display.print(alphapower);
-  display.print(" ");
+  display.print("  ");
+  display.print("B: ");
+  display.print(betapower);
   display.println();
 
-  display.print("Beta:  ");
-  display.print(betapower);
-  display.print(" ");
-  display.println();
-  */
 
   drawBarGraph();
   display.display();
