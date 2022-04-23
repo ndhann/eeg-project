@@ -90,29 +90,6 @@ void printPowers() {
   Serial.println(betapower);
 }
 
-// Draws a bar using ASCII characters based on the two quantities given
-void drawBar(double power, double maxpower) {
-  if (((power / maxpower) > (0.8))) {
-    display.print("|");
-  }
-
-  if (((power / maxpower) > (0.6))) {
-    display.print("|");
-  }
-
-  if (((power / maxpower) > (0.4))) {
-    display.print("|");
-  }
-
-  if (((power / maxpower) > (0.2))) {
-    display.print("|");
-  }
-
-  if (((power / maxpower) > (0.1))) {
-    display.print("|");
-  }
-}
-
 void drawBarGraph() {
   double max = output[1];
   for (int i = 2; i <= 30; i++) {
@@ -121,10 +98,10 @@ void drawBarGraph() {
     }
   }
 
-  double scaling = max / 16;
+  double scaling = 16 / max;
 
   for (int i = 2; i <= 30; i++) {
-    display.drawLine(4 * i, 31 - (output[i] / scaling), 4 * i, 31, WHITE);
+    display.drawLine(4 * i, 31 - ((int) (output[i] * scaling)), 4 * i, 31, WHITE);
   }
 }
 
