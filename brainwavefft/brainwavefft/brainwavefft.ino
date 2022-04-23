@@ -53,25 +53,25 @@ void calculatePowers() {
   // calculate the RMS for each frequency range
   // Delta: 1-3Hz
   for (int i = 1; i <= 3; i++) {
-    deltapower += sq(inputReal[i]);
+    deltapower += sq(output[i]);
   }
   deltapower = sqrt(deltapower / 3.0);
 
   // Theta: 4-8Hz
   for (int i = 4; i <= 8; i++) {
-    thetapower += sq(inputReal[i]);
+    thetapower += sq(output[i]);
   }
   thetapower = sqrt(thetapower / 5.0);
 
   // Alpha: 9-12Hz
   for (int i = 9; i <= 12; i++) {
-    alphapower += sq(inputReal[i]);
+    alphapower += sq(output[i]);
   }
   alphapower = sqrt(alphapower / 4.0);
 
   // Beta: 13-30Hz
   for (int i = 13; i <= 30; i++) {
-    betapower += sq(inputReal[i]);
+    betapower += sq(output[i]);
   }
   betapower = sqrt(betapower / 18.0);
 }
